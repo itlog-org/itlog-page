@@ -1,0 +1,555 @@
+<?xml version="1.0" encoding="utf-8"?>
+<search>
+  
+  
+  
+  <entry>
+    <title>Windows配置JDK环境变量</title>
+    <link href="/2022/05/windows%E9%85%8D%E7%BD%AEjdk%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/"/>
+    <url>/2022/05/windows%E9%85%8D%E7%BD%AEjdk%E7%8E%AF%E5%A2%83%E5%8F%98%E9%87%8F/</url>
+    
+    <content type="html"><![CDATA[<blockquote><p>在windows下JDK的环境变量配置。<br>32位系统和64位系统操作一致。<br>任意版本的JDK都适用</p></blockquote><ol><li>右击计算机-属性-高级系统设置-高级-环境变量，弹出“环境变量”对话框。<br>在下方的系统变量中修改值（尽量不要在用户变量中修改）。<br>添加<code>JAVA_HOME</code>指明JDK安装路径,如<code>C:\Program Files\Java\jdk1.7.0</code>，此路径下包括lib，bin，jre等文件夹。</li><li>找到<code>Path</code>变量，在<code>Path</code>变量的开头加入：<code>%JAVA_HOME%\bin;%JAVA_HOME%\jre\bin;</code>。</li><li>添加<code>CLASSPATH</code>变量为java加载类的(class or lib)路径。（这样java虚拟机装载 class 文件的时候才知道上哪去找只有类在 classpath 中，java命令才能识别）<br>设为：<code>.;%JAVA_HOME%\lib;%JAVA_HOME%\lib\tools.jar</code>（要加.表示当前路径，当前路径的意思就是你现在编译运行的程序class文件所在的地方）。</li></ol><p><strong>分号主要是用来分隔jdk的路径和其他系统程序和应用程序的路径，环境变量值的结尾可加分号或不加</strong></p><p><em>CLASSPATH变量值中的.表示当前目录，另外<code>java_home</code>这个变量整体被<code>path</code>和<code>classpath</code> 引用，好处在于今后重装jdk 后，只需改<code>java_home</code>的值</em></p><p><strong>测试是否配置成功：</strong></p><p>在命令行（命令提示符）中输入：</p><ol><li><code>java</code>回车后应该会出现 java 的各种命令；</li><li><code>javac</code>回车会出现相关编译的命令；</li><li><code>java -version</code>回车 出现 jdk 版本号；</li></ol><p><strong>ps：注意<code>java</code>和<code>javac</code>都是命令，后面<code>-version</code>是参数，中间是有空格的</strong></p>]]></content>
+    
+    
+    <categories>
+      
+      <category>工具</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Java</tag>
+      
+      <tag>JDK</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>JavaWeb获取客户端IP地址</title>
+    <link href="/2022/05/javaweb%E8%8E%B7%E5%8F%96%E5%AE%A2%E6%88%B7%E7%AB%AFip%E5%9C%B0%E5%9D%80/"/>
+    <url>/2022/05/javaweb%E8%8E%B7%E5%8F%96%E5%AE%A2%E6%88%B7%E7%AB%AFip%E5%9C%B0%E5%9D%80/</url>
+    
+    <content type="html"><![CDATA[<h3 id="1-一种参考方式如下："><a href="#1-一种参考方式如下：" class="headerlink" title="1. 一种参考方式如下："></a>1. 一种参考方式如下：</h3><p>在反向代理( Nginx )上配置，增加Real-IP字段：</p><div class="code-wrapper"><pre><code class="hljs conf">location / &#123; ... proxy_set_header Real-IP $remote_addr; ...&#125;</code></pre></div><h3 id="2-业务系统中，获取来源IP的代码如下-Java示例-："><a href="#2-业务系统中，获取来源IP的代码如下-Java示例-：" class="headerlink" title="2. 业务系统中，获取来源IP的代码如下(Java示例)："></a>2. 业务系统中，获取来源IP的代码如下(Java示例)：</h3><div class="code-wrapper"><pre><code class="hljs java"><span class="hljs-meta">@SuppressWarnings(&amp;quot;unchecked&amp;quot;)</span><span class="hljs-keyword">public</span> <span class="hljs-keyword">static</span> ClientIps <span class="hljs-title function_">getClientIpAddr</span><span class="hljs-params">(HttpServletRequest request)</span> &#123;    <span class="hljs-comment">// 获取真实ip</span>    <span class="hljs-type">String</span> <span class="hljs-variable">ip</span> <span class="hljs-operator">=</span> request.getHeader(&amp;quot;real-ip&amp;quot;);    <span class="hljs-keyword">if</span> (StringUtils.isBlank(ip) || (&amp;quot;unknown&amp;quot;.equalsIgnoreCase(ip.trim()))) &#123;        ip = request.getHeader(&amp;quot;remote-host&amp;quot;);    &#125;    <span class="hljs-keyword">if</span> (StringUtils.isBlank(ip) || (&amp;quot;unknown&amp;quot;.equalsIgnoreCase(ip.trim()))) &#123;        ip = request.getRemoteAddr();    &#125;    <span class="hljs-type">ClientIps</span> <span class="hljs-variable">clientIps</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">ClientIps</span>();    clientIps.setTrueIp(StringUtils.trimToEmpty(ip));    <span class="hljs-comment">// 获取代理ip</span>    ip = request.getHeader(&amp;quot;x-forwarded-<span class="hljs-keyword">for</span>&amp;quot;);    <span class="hljs-type">StringBuilder</span> <span class="hljs-variable">proxyIps</span> <span class="hljs-operator">=</span> <span class="hljs-keyword">new</span> <span class="hljs-title class_">StringBuilder</span>();    <span class="hljs-keyword">if</span> (StringUtils.isNotBlank(ip) &amp;amp;&amp;amp; (StringUtils.contains(ip, &amp;quot;,&amp;quot;))) &#123;        <span class="hljs-type">String</span> <span class="hljs-variable">temp</span> <span class="hljs-operator">=</span> StringUtils.substringBeforeLast(ip, &amp;quot;,&amp;quot;);        <span class="hljs-keyword">if</span> (StringUtils.isNotBlank(temp)) &#123;            proxyIps.append(&amp;quot;x-forwarded-<span class="hljs-keyword">for</span>:&amp;quot;);            proxyIps.append(temp);            proxyIps.append(&amp;quot;\n&amp;quot;);        &#125;    &#125;&#125;</code></pre></div>]]></content>
+    
+    
+    <categories>
+      
+      <category>编程</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Java</tag>
+      
+      <tag>IP</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>常用正则表达式</title>
+    <link href="/2022/04/%E5%B8%B8%E7%94%A8%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/"/>
+    <url>/2022/04/%E5%B8%B8%E7%94%A8%E6%AD%A3%E5%88%99%E8%A1%A8%E8%BE%BE%E5%BC%8F/</url>
+    
+    <content type="html"><![CDATA[<h2 id="1-校验数字的表达式"><a href="#1-校验数字的表达式" class="headerlink" title="1. 校验数字的表达式"></a>1. 校验数字的表达式</h2><ul><li>数字：<code>^[0-9]*$</code></li><li>n位的数字：<code>^\d&#123;n&#125;$</code></li><li>至少n位的数字：<code>^\d&#123;n,&#125;$</code></li><li>m-n位的数字：<code>^\d&#123;m,n&#125;$</code></li><li>零和非零开头的数字：<code>^(0|[1-9][0-9]*)$</code></li><li>非零开头的最多带两位小数的数字：<code>^([1-9][0-9]*)+(.[0-9]&#123;1,2&#125;)?$</code></li><li>带1-2位小数的正数或负数：<code>^(\-)?\d+(\.\d&#123;1,2&#125;)?$</code></li><li>正数、负数、和小数：<code>^(\-|\+)?\d+(\.\d+)?$</code></li><li>有两位小数的正实数：<code>^[0-9]+(.[0-9]&#123;2&#125;)?$</code></li><li>有1~3位小数的正实数：<code>^[0-9]+(.[0-9]&#123;1,3&#125;)?$</code></li><li>非零的正整数<code>：^[1-9]\d*$</code>或<code>^([1-9][0-9]*)&#123;1,3&#125;$</code>或<code>^\+?[1-9][0-9]*$</code></li><li>非零的负整数：<code>^\-[1-9][]0-9&quot;*$</code>或<code>^-[1-9]\d*$</code></li><li>非负整数：<code>^\d+$</code>或<code>^[1-9]\d*|0$</code></li><li>非正整数：<code>^-[1-9]\d*|0$</code>或<code>^((-\d+)|(0+))$</code></li><li>非负浮点数：<code>^\d+(\.\d+)?$</code>或<code> ^[1-9]\d*\.\d*|0\.\d*[1-9]\d*|0?\.0+|0$</code></li><li>非正浮点数：<code>^((-\d+(\.\d+)?)|(0+(\.0+)?))$</code>或<code>^(-([1-9]\d*\.\d*|0\.\d*[1-9]\d*))- |0?\.0+|0$</code></li><li>正浮点数：<code>^[1-9]\d*\.\d*|0\.\d*[1-9]\d*$</code>或<code>^(([0-9]+\.[0-9]*[1-9][0-9]*)|([0-9]- *[1-9][0-9]*\.[0-9]+)|([0-9]*[1-9][0-9]*))$</code></li><li>负浮点数：<code>^-([1-9]\d*\.\d*|0\.\d*[1-9]\d*)$</code>或<code>^(-(([0-9]+\.[0-9]*[1-9][0-9]*)|(- [0-9]*[1-9][0-9]*\.[0-9]+)|([0-9]*[1-9][0-9]*)))$</code></li><li>浮点数：<code>^(-?\d+)(\.\d+)?$</code>或<code>^-?([1-9]\d*\.\d*|0\.\d*[1-9]\d*|0?\.0+|0)$</code><h2 id="2-校验字符的表达式"><a href="#2-校验字符的表达式" class="headerlink" title="2. 校验字符的表达式"></a>2. 校验字符的表达式</h2></li><li>汉字：<code>^[\u4e00-\u9fa5]&#123;0,&#125;$</code></li><li>英文和数字：<code>^[A-Za-z0-9]+$</code>或<code>^[A-Za-z0-9]&#123;4,40&#125;$</code></li><li>长度为3-20的所有字符：<code>^.&#123;3,20&#125;$</code></li><li>由26个英文字母组成的字符串：<code>^[A-Za-z]+$</code></li><li>由26个大写英文字母组成的字符串：<code>^[A-Z]+$</code></li><li>由26个小写英文字母组成的字符串：<code>^[a-z]+$</code></li><li>由数字和26个英文字母组成的字符串：<code>^[A-Za-z0-9]+$</code></li><li>由数字、26个英文字母或者下划线组成的字符串：<code>^\w+$或^\w&#123;3,20&#125;$</code></li><li>中文、英文、数字包括下划线：<code>^[\u4E00-\u9FA5A-Za-z0-9_]+$</code></li><li>中文、英文、数字但不包括下划线等符号：<code>^[\u4E00-\u9FA5A-Za-z0-9]+$</code>或<code>^- [\u4E00-\u9FA5A-Za-z0-9]&#123;2,20&#125;$</code></li><li>可以输入含有<code>^%&amp;&#39;,;=?$\&quot;</code>等字符：<code>[^%&amp;&#39;,;=?$\x22]+</code></li><li>禁止输入含有<del>的字符：&#96;[^</del>\x22]+&#96;<h2 id="3-特殊需求表达式"><a href="#3-特殊需求表达式" class="headerlink" title="3. 特殊需求表达式"></a>3. 特殊需求表达式</h2></li><li>mail地址：<code>^\w+([-+.]\w+)*@\w+([-.]\w+)*\.\w+([-.]\w+)*$</code></li><li>域名：<code>[a-zA-Z0-9][-a-zA-Z0-9]&#123;0,62&#125;(/.[a-zA-Z0-9][-a-zA-Z0-9]&#123;0,62&#125;)+/.?</code></li><li>nternetURL：<code>[a-zA-z]+://[^\s]*</code>或<code>^http://([\w-]+\.)+[\w-]+(/[\w-./?%&amp;=]*)?$</code></li><li>手机号码：<code>^(13[0-9]|14[5|7]|15[0|1|2|3|5|6|7|8|9]|18[0|1|2|3|5|6|7|8|9])\d&#123;8&#125;-</code></li><li>电话号码(“XXX-XXXXXXX”、”XXXX-XXXXXXXX”、”XXX-XXXXXXX”、”XXX-XXXXXXXX”、”- XXXXXX”和”XXXXXXXX)：<code>^(\(\d&#123;3,4&#125;-)|\d&#123;3.4&#125;-)?\d&#123;7,8&#125;$</code></li><li>国内电话号码(0511-4405222、021-87888822)：<code>\d&#123;3&#125;-\d&#123;8&#125;|\d&#123;4&#125;-\d&#123;7&#125;</code></li><li>短身份证号码(数字、字母x结尾)：<code>^([0-9])&#123;7,18&#125;(x|X)?$</code>或<code>^\d&#123;8,18&#125;|[0-9x]&#123;8,18&#125;|- 0-9X]&#123;8,18&#125;?$</code></li><li>帐号是否合法(字母开头，允许5-16字节，允许字母数字下划线)：<code>^[a-zA-Z][a-zA-Z0-9_]- 4,15&#125;$</code></li><li>密码(以字母开头，长度在6~18之间，只能包含字母、数字和下划线)：<code>^[a-zA-Z]\w&#123;5,17&#125;$</code></li><li>强密码(必须包含大小写字母和数字的组合，不能使用特殊字符，长度在8-10之间)：<code>^(?=.*\d)- ?=.*[a-z])(?=.*[A-Z]).&#123;8,10&#125;$</code></li><li>日期格式：<code>^\d&#123;4&#125;-\d&#123;1,2&#125;-\d&#123;1,2&#125;</code></li><li>一年的12个月(01～09和1～12)：<code>^(0?[1-9]|1[0-2])$</code></li><li>一个月的31天(01～09和1～31)：<code>^((0?[1-9])|((1|2)[0-9])|30|31)$</code></li><li>钱的输入格式：<ol><li>有四种钱的表示形式我们可以接受:”10000.00″ 和 “10,000.00”, 和没有 “分” 的 “10000” 和 “10,000”：<code>^[1-9][0-9]*$</code></li><li>这表示任意一个不以0开头的数字,但是,这也意味着一个字符”0″不通过,所以我们采用下面的形式：<code>^(0|[1-9][0-9]*)$</code></li><li>一个0或者一个不以0开头的数字.我们还可以允许开头有一个负号：<code>^(0|-?[1-9][0-9]*)$</code></li><li>这表示一个0或者一个可能为负的开头不为0的数字.让用户以0开头好了.把负号的也去掉,因为钱总不能是负的吧下面我们要加的是说明可能的小数部分：<code>^[0-9]+(.[0-9]+)?$</code></li><li>必须说明的是,小数点后面至少应该有1位数,所以”10.”是不通过的,但是 “10” 和 “10.2” 是通过的：<code>^[0-9]+(.[0-9]&#123;2&#125;)?$</code></li><li>这样我们规定小数点后面必须有两位,如果你认为太苛刻了,可以这样：<code>^[0-9]+(.[0-9]&#123;1,2&#125;)?$</code></li><li>这样就允许用户只写一位小数.下面我们该考虑数字中的逗号了,我们可以这样：<code>^[0-9]&#123;1,3&#125;(,[0-9]&#123;3&#125;)*(.[0-9]&#123;1,2&#125;)?$</code></li><li>1到3个数字,后面跟着任意个 逗号+3个数字,逗号成为可选,而不是必须：<code>^([0-9]+|[0-9]&#123;1,3&#125;(,[0-9]&#123;3&#125;)*)(.[0-9]&#123;1,2&#125;)?$</code></li></ol><p><strong>备注：</strong> 这就是最终结果了,别忘了”+”可以用”*”替代如果你觉得空字符串也可以接受的话(奇怪,为什么?)最后,别忘了在用函数时去掉去掉那个反斜杠,一般的错误都在这里</p></li><li>xml文件：<code>^([a-zA-Z]+-?)+[a-zA-Z0-9]+\\.[x|X][m|M][l|L]$</code></li><li>中文字符的正则表达式<code>：[\u4e00-\u9fa5]</code></li><li>双字节字符：<code>[^\x00-\xff]</code> (包括汉字在内，可以用来计算字符串的长度(一个双字节字符长度- 计2，ASCII字符计1))</li><li>空白行的正则表达式：<code>\n\s*\r</code> (可以用来删除空白行)</li><li>HTML标记的正则表达式：<code>&lt;(\S*?)[^&gt;]*&gt;.*?&lt;/\1&gt;|&lt;.*? /&gt;</code> (网上流传的版本太糟糕，上面这- 个也仅仅能部分，对于复杂的嵌套标记依旧无能为力)</li><li>首尾空白字符的正则表达式：<code>^\s*|\s*$</code>或<code>(^\s*)|(\s*$)</code> (可以用来删除行首行尾的空白字符- (包括空格、制表符、换页符等等)，非常有用的表达式)</li><li>腾讯QQ号：<code>[1-9][0-9]&#123;4,&#125;</code> (腾讯QQ号从10000开始)</li><li>中国邮政编码：<code>[1-9]\d&#123;5&#125;(?!\d)</code> (中国邮政编码为6位数字)</li><li>IP地址：<code>\d+\.\d+\.\d+\.\d+</code> (提取IP地址时有用)</li></ul>]]></content>
+    
+    
+    <categories>
+      
+      <category>编程</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>正则</tag>
+      
+      <tag>脚本</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Linux中less命令使用</title>
+    <link href="/2022/04/linux%E4%B8%ADless%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8/"/>
+    <url>/2022/04/linux%E4%B8%ADless%E5%91%BD%E4%BB%A4%E4%BD%BF%E7%94%A8/</url>
+    
+    <content type="html"><![CDATA[<p>less 与 more 类似，但使用 less 可以随意浏览文件，而 more 仅能向前移动，却不能向后移动，而且 less 在查看之前不会加载整个文件。</p><h2 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h2><div class="code-wrapper"><pre><code class="hljs shell">less [参数] 文件</code></pre></div><p>参数说明：</p><ul><li>-b &lt;缓冲区大小&gt; 设置缓冲区的大小</li><li>-e 当文件显示结束后，自动离开</li><li>-f 强迫打开特殊文件，例如外围设备代号、目录和二进制文件</li><li>-g 只标志最后搜索的关键词</li><li>-i 忽略搜索时的大小写</li><li>-m 显示类似more命令的百分比</li><li>-N 显示每行的行号</li><li>-o &lt;文件名&gt; 将less 输出的内容在指定文件中保存起来</li><li>-Q 不使用警告音</li><li>-s 显示连续空行为一行</li><li>-S 行过长时间将超出部分舍弃</li><li>-x &lt;数字&gt; 将”tab”键显示为规定的数字空格</li><li>&#x2F;字符串：向下搜索”字符串”的功能</li><li>?字符串：向上搜索”字符串”的功能</li><li>n：重复前一个搜索（与 &#x2F; 或 ? 有关）</li><li>N：反向重复前一个搜索（与 &#x2F; 或 ? 有关）</li><li>b 向后翻一页</li><li>d 向后翻半页</li><li>h 显示帮助界面</li><li>Q 退出less 命令</li><li>u 向前滚动半页</li><li>y 向前滚动一行</li><li>空格键 滚动一页</li><li>回车键 滚动一行</li><li>[pagedown]： 向下翻动一页</li><li>[pageup]： 向上翻动一页</li></ul><h2 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h2><ol><li>查看文件<div class="code-wrapper"><pre><code class="hljs shell">less log2013.log</code></pre></div></li><li>ps查看进程信息并通过less分页显示<div class="code-wrapper"><pre><code class="hljs shell">ps -ef |less</code></pre></div></li><li>查看命令历史使用记录并通过less分页显示<div class="code-wrapper"><pre><code class="hljs shell">[root@localhost test]# history | less22 scp -r tomcat6.0.32 root@192.168.120.203:/opt/soft23 cd ..24 scp -r web root@192.168.120.203:/opt/25 cd soft26 ls……省略……</code></pre></div></li><li>浏览多个文件<div class="code-wrapper"><pre><code class="hljs shell">less log2013.log log2014.log</code></pre></div>说明：<br>输入 ：n后，切换到 log2014.log<br>输入 ：p 后，切换到log2013.log<h2 id="附加备注"><a href="#附加备注" class="headerlink" title="附加备注"></a>附加备注</h2></li><li>全屏导航<ul><li>ctrl + F - 向前移动一屏</li><li>ctrl + B - 向后移动一屏</li><li>ctrl + D - 向前移动半屏</li><li>ctrl + U - 向后移动半屏</li></ul></li><li>单行导航<ul><li>j - 向前移动一行</li><li>k - 向后移动一行</li></ul></li><li>其它导航<ul><li>G - 移动到最后一行</li><li>g - 移动到第一行</li><li>q &#x2F; ZZ - 退出 less 命令</li></ul></li><li>其它有用的命令<ul><li>v - 使用配置的编辑器编辑当前文件</li><li>h - 显示 less 的帮助文档</li><li>&amp;pattern - 仅显示匹配模式的行，而不是整个文件</li></ul></li><li>标记导航<br>当使用 less 查看大文件时，可以在任何一个位置作标记，可以通过命令导航到标有特定标记的文本位置：<ul><li>ma - 使用 a 标记文本的当前位置</li><li>‘a - 导航到标记 a 处</li></ul></li></ol>]]></content>
+    
+    
+    <categories>
+      
+      <category>服务器</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Linux</tag>
+      
+      <tag>Less</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Gti合并提交记录</title>
+    <link href="/2022/04/gti%E5%90%88%E5%B9%B6%E6%8F%90%E4%BA%A4%E8%AE%B0%E5%BD%95/"/>
+    <url>/2022/04/gti%E5%90%88%E5%B9%B6%E6%8F%90%E4%BA%A4%E8%AE%B0%E5%BD%95/</url>
+    
+    <content type="html"><![CDATA[<p>我们经常会在本地针对一个问题进行多次提交，这就会产生一些不必要的日志，怎样才能合并这些提交到一个里面呢？，假设下边是git的提交日志.</p><div class="code-wrapper"><pre><code class="hljs apache"><span class="hljs-attribute">commit</span> e1a7dfa9dfea8e63ad079dba37c61d8e80ffbe1b<span class="hljs-attribute">Author</span>: Pino<span class="hljs-attribute">Date</span>: Mon Nov <span class="hljs-number">28</span> <span class="hljs-number">14</span>:<span class="hljs-number">01</span>:<span class="hljs-number">45</span> <span class="hljs-number">2016</span> +<span class="hljs-number">0800</span><span class="hljs-attribute">add</span> text in second.txt commit c6e45575484666245bb22d2d5d534bfee91f44c6 Author: Pino<span class="hljs-attribute">Date</span>: Mon Nov <span class="hljs-number">28</span> <span class="hljs-number">13</span>:<span class="hljs-number">59</span>:<span class="hljs-number">43</span> <span class="hljs-number">2016</span> +<span class="hljs-number">0800</span><span class="hljs-attribute">create</span> second.txt</code></pre></div><p>假设合并这两个提交，可以按照下面过程</p><div class="code-wrapper"><pre><code class="hljs shell">git rebase -i HEAD~2````可以先用man查看下git rebase的命令参数，这样会有如下提示：</code></pre></div><p>pick c6e4557 create second.txt<br>pick e1a7dfa add text in second.txt</p><h1 id="Rebase-a71eba2-e1a7dfa-onto-a71eba2"><a href="#Rebase-a71eba2-e1a7dfa-onto-a71eba2" class="headerlink" title="Rebase a71eba2..e1a7dfa onto a71eba2"></a>Rebase a71eba2..e1a7dfa onto a71eba2</h1><h1 id=""><a href="#" class="headerlink" title=""></a></h1><h1 id="Commands"><a href="#Commands" class="headerlink" title="Commands:"></a>Commands:</h1><h1 id="p-pick-x3D-use-commit"><a href="#p-pick-x3D-use-commit" class="headerlink" title="p, pick &#x3D; use commit"></a>p, pick &#x3D; use commit</h1><h1 id="r-reword-x3D-use-commit-but-edit-the-commit-message"><a href="#r-reword-x3D-use-commit-but-edit-the-commit-message" class="headerlink" title="r, reword &#x3D; use commit, but edit the commit message"></a>r, reword &#x3D; use commit, but edit the commit message</h1><h1 id="e-edit-x3D-use-commit-but-stop-for-amending"><a href="#e-edit-x3D-use-commit-but-stop-for-amending" class="headerlink" title="e, edit &#x3D; use commit, but stop for amending"></a>e, edit &#x3D; use commit, but stop for amending</h1><h1 id="s-squash-x3D-use-commit-but-meld-into-previous-commit"><a href="#s-squash-x3D-use-commit-but-meld-into-previous-commit" class="headerlink" title="s, squash &#x3D; use commit, but meld into previous commit"></a>s, squash &#x3D; use commit, but meld into previous commit</h1><h1 id="f-fixup-x3D-like-quot-squash-quot-but-discard-this-commit-amp-039-s-log-message"><a href="#f-fixup-x3D-like-quot-squash-quot-but-discard-this-commit-amp-039-s-log-message" class="headerlink" title="f, fixup &#x3D; like &quot;squash&quot;, but discard this commit&amp;#039;s log message"></a>f, fixup &#x3D; like &quot;squash&quot;, but discard this commit&amp;#039;s log message</h1><h1 id="x-exec-x3D-run-command-the-rest-of-the-line-using-shell"><a href="#x-exec-x3D-run-command-the-rest-of-the-line-using-shell" class="headerlink" title="x, exec &#x3D; run command (the rest of the line) using shell"></a>x, exec &#x3D; run command (the rest of the line) using shell</h1><h1 id="-1"><a href="#-1" class="headerlink" title=""></a></h1><h1 id="These-lines-can-be-re-ordered-they-are-executed-from-top-to-bottom"><a href="#These-lines-can-be-re-ordered-they-are-executed-from-top-to-bottom" class="headerlink" title="These lines can be re-ordered; they are executed from top to bottom."></a>These lines can be re-ordered; they are executed from top to bottom.</h1><h1 id="-2"><a href="#-2" class="headerlink" title=""></a></h1><h1 id="If-you-remove-a-line-here-THAT-COMMIT-WILL-BE-LOST"><a href="#If-you-remove-a-line-here-THAT-COMMIT-WILL-BE-LOST" class="headerlink" title="If you remove a line here THAT COMMIT WILL BE LOST."></a>If you remove a line here THAT COMMIT WILL BE LOST.</h1><h1 id="-3"><a href="#-3" class="headerlink" title=""></a></h1><h1 id="However-if-you-remove-everything-the-rebase-will-be-aborted"><a href="#However-if-you-remove-everything-the-rebase-will-be-aborted" class="headerlink" title="However, if you remove everything, the rebase will be aborted."></a>However, if you remove everything, the rebase will be aborted.</h1><h1 id="-4"><a href="#-4" class="headerlink" title=""></a></h1><h1 id="Note-that-empty-commits-are-commented-out"><a href="#Note-that-empty-commits-are-commented-out" class="headerlink" title="Note that empty commits are commented out"></a>Note that empty commits are commented out</h1><div class="code-wrapper"><pre><code class="hljs asciidoc">第一列是rebase具体执行的操作，其中操作可以选择，其中含义如下：<span class="hljs-bullet">- </span>选择pick操作，git会应用这个补丁，以同样的提交信息（commit message）保存提交<span class="hljs-bullet">- </span>选择reword操作，git会应用这个补丁，但需要重新编辑提交信息<span class="hljs-bullet">- </span>选择edit操作，git会应用这个补丁，但会因为amending而终止<span class="hljs-bullet">- </span>选择squash操作，git会应用这个补丁，但会与之前的提交合并<span class="hljs-bullet">- </span>选择fixup操作，git会应用这个补丁，但会丢掉提交日志<span class="hljs-bullet">- </span>选择exec操作，git会在shell中运行这个命令对比之前的两个提交提交，我觉得第一个提交可以保留，第二个合并到第一个就可以了。将第二个pick改成squash或者s，然后保存退出。如下：</code></pre></div><p>pick c6e4557 create second.txt<br>s e1a7dfa add text in second.txt</p><div class="code-wrapper"><pre><code class="hljs">此时git会自动将第二个提交合并到第一个提交，并弹出合并提示信息，如下：</code></pre></div><h1 id="This-is-a-combination-of-2-commits"><a href="#This-is-a-combination-of-2-commits" class="headerlink" title="This is a combination of 2 commits."></a>This is a combination of 2 commits.</h1><h1 id="The-first-commit-amp-039-s-message-is"><a href="#The-first-commit-amp-039-s-message-is" class="headerlink" title="The first commit&amp;#039;s message is:"></a>The first commit&amp;#039;s message is:</h1><p>create second.txt</p><h1 id="This-is-the-2nd-commit-message"><a href="#This-is-the-2nd-commit-message" class="headerlink" title="This is the 2nd commit message:"></a>This is the 2nd commit message:</h1><p>add text in second.txt</p><h1 id="请为您的变更输入提交说明。以-amp-039-amp-039-开始的行将被忽略，而一个空的提交"><a href="#请为您的变更输入提交说明。以-amp-039-amp-039-开始的行将被忽略，而一个空的提交" class="headerlink" title="请为您的变更输入提交说明。以 &amp;#039;#&amp;#039; 开始的行将被忽略，而一个空的提交"></a>请为您的变更输入提交说明。以 &amp;#039;#&amp;#039; 开始的行将被忽略，而一个空的提交</h1><h1 id="说明将会终止提交。"><a href="#说明将会终止提交。" class="headerlink" title="说明将会终止提交。"></a>说明将会终止提交。</h1><h1 id="-5"><a href="#-5" class="headerlink" title=""></a></h1><h1 id="日期：-Mon-Nov-28-13-59-43-2016-0800"><a href="#日期：-Mon-Nov-28-13-59-43-2016-0800" class="headerlink" title="日期：  Mon Nov 28 13:59:43 2016 +0800"></a>日期：  Mon Nov 28 13:59:43 2016 +0800</h1><h1 id="-6"><a href="#-6" class="headerlink" title=""></a></h1><h1 id="变基操作正在进行中；至-a71eba2"><a href="#变基操作正在进行中；至-a71eba2" class="headerlink" title="变基操作正在进行中；至 a71eba2"></a>变基操作正在进行中；至 a71eba2</h1><h1 id="您在执行将分支-amp-039-master-amp-039-变基到-amp-039-a71eba2-amp-039-的操作时编辑提交。"><a href="#您在执行将分支-amp-039-master-amp-039-变基到-amp-039-a71eba2-amp-039-的操作时编辑提交。" class="headerlink" title="您在执行将分支 &amp;#039;master&amp;#039; 变基到 &amp;#039;a71eba2&amp;#039; 的操作时编辑提交。"></a>您在执行将分支 &amp;#039;master&amp;#039; 变基到 &amp;#039;a71eba2&amp;#039; 的操作时编辑提交。</h1><h1 id="-7"><a href="#-7" class="headerlink" title=""></a></h1><h1 id="要提交的变更："><a href="#要提交的变更：" class="headerlink" title="要提交的变更："></a>要提交的变更：</h1><h1 id="新文件：-second-txt"><a href="#新文件：-second-txt" class="headerlink" title="新文件：   second.txt"></a>新文件：   second.txt</h1><h1 id="-8"><a href="#-8" class="headerlink" title=""></a></h1><div class="code-wrapper"><pre><code class="hljs 1c">如果需要修改下提交信息，如果不需要直接保存退出即可。此时我们已经完成了将两个提交合并为一个的处理，可以通过git <span class="hljs-built_in">log</span>查看</code></pre></div><p>commit 251d222ac45f3596943480bd5a7cc695b5d7d6e9<br>Author: Pino<br>Date:   Mon Nov 28 13:59:43 2016 +0800</p><div class="code-wrapper"><pre><code class="hljs">create second.txtadd text in second.txt</code></pre></div><p>&#96;&#96;&#96;</p>]]></content>
+    
+    
+    <categories>
+      
+      <category>工具</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Git</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Linux使用tar压缩和解压缩</title>
+    <link href="/2022/03/linux%E4%BD%BF%E7%94%A8tar%E5%8E%8B%E7%BC%A9%E5%92%8C%E8%A7%A3%E5%8E%8B%E7%BC%A9/"/>
+    <url>/2022/03/linux%E4%BD%BF%E7%94%A8tar%E5%8E%8B%E7%BC%A9%E5%92%8C%E8%A7%A3%E5%8E%8B%E7%BC%A9/</url>
+    
+    <content type="html"><![CDATA[<h3 id="tar"><a href="#tar" class="headerlink" title="tar"></a><strong>tar</strong></h3><ul><li><code>-c</code>: 建立压缩档案</li><li><code>-x</code>：解压</li><li><code>-t</code>：查看内容</li><li><code>-r</code>：向压缩归档文件末尾追加文件</li><li><code>-u</code>：更新原压缩包中的文件</li></ul><p>这五个是独立的命令，压缩解压都要用到其中一个，可以和别的命令连用但只能用其中一个。下面的参数是根据需要在压缩或解压档案时可选的。</p><ul><li><code>-z</code>：有gzip属性的</li><li><code>-j</code>：有bz2属性的</li><li><code>-Z</code>：有compress属性的</li><li><code>-v</code>：显示所有过程</li><li><code>-O</code>：将文件解开到标准输出</li></ul><p>下面的参数<code>-f</code>是必须的</p><h4 id="f"><a href="#f" class="headerlink" title="-f:"></a><code>-f</code>:</h4><p>使用档案名字，切记，这个参数是最后一个参数，后面只能接档案名。</p><p>1. </p><div class="code-wrapper"><pre><code class="hljs shell">tar -cf all.tar *.jpg</code></pre></div><p>这条命令是将所有.jpg的文件打成一个名为all.tar的包。-c是表示产生新的包，-f指定包的文件名。<br>2. </p><div class="code-wrapper"><pre><code class="hljs shell">tar -rf all.tar *.gif</code></pre></div><p>这条命令是将所有.gif的文件增加到all.tar的包里面去。-r是表示增加文件的意思。<br>3. </p><div class="code-wrapper"><pre><code class="hljs shell">tar -uf all.tar logo.gif</code></pre></div><p>这条命令是更新原来tar包all.tar中logo.gif文件，-u是表示更新文件的意思。<br>4. </p><div class="code-wrapper"><pre><code class="hljs shell">tar -tf all.tar</code></pre></div><p>这条命令是列出all.tar包中所有文件，-t是列出文件的意思<br>5. </p><div class="code-wrapper"><pre><code class="hljs shell">tar -xf all.tar</code></pre></div><p>这条命令是解出all.tar包中所有文件，-x是解开的意思</p><h3 id="压缩"><a href="#压缩" class="headerlink" title="压缩"></a>压缩</h3><ul><li><code>tar -cvf jpg.tar *.jpg</code> &#x2F;&#x2F;将目录里所有jpg文件打包成tar.jpg </li><li><code>tar -czf jpg.tar.gz *.jpg</code>   &#x2F;&#x2F;将目录里所有jpg文件打包成jpg.tar后，并且将其用gzip压缩，生成一个gzip压缩过的包，命名为jpg.tar.gz</li><li><code>tar -cjf jpg.tar.bz2 *.jpg</code> &#x2F;&#x2F;将目录里所有jpg文件打包成jpg.tar后，并且将其用bzip2压缩，生成一个bzip2压缩过的包，命名为jpg.tar.bz2</li><li><code>tar -cZf jpg.tar.Z *.jpg</code>   &#x2F;&#x2F;将目录里所有jpg文件打包成jpg.tar后，并且将其用compress压缩，生成一个umcompress压缩过的包，命名为jpg.tar.Z</li><li><code>rar a jpg.rar *.jpg</code> &#x2F;&#x2F;rar格式的压缩，需要先下载rar for linux</li><li><code>zip jpg.zip *.jpg</code> &#x2F;&#x2F;zip格式的压缩，需要先下载zip for linux</li></ul><h3 id="解压"><a href="#解压" class="headerlink" title="解压"></a>解压</h3><ul><li><code>tar -xvf file.tar</code> &#x2F;&#x2F;解压 tar包</li><li><code>tar -xzvf file.tar.gz</code> &#x2F;&#x2F;解压tar.gz</li><li><code>tar -xjvf file.tar.bz2</code>   &#x2F;&#x2F;解压 tar.bz2</li><li><code>tar -xZvf file.tar.Z</code>   &#x2F;&#x2F;解压tar.Z</li><li><code>unrar e file.rar</code> &#x2F;&#x2F;解压rar</li><li><code>unzip file.zip</code> &#x2F;&#x2F;解压zip</li></ul><h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><ol><li><code>*.tar</code> 用<code>tar -xvf</code>解压</li><li><code>*.gz</code> 用<code>gzip -d</code>或者<code>gunzip</code>解压</li><li><code>*.tar.gz</code>和<code>*.tgz</code>用<code>tar -xzf</code>解压</li><li><code>*.bz2</code> 用<code>bzip2 -d</code>或者用<code>bunzip2</code>解压</li><li><code>*.tar.bz2</code>用<code>tar -xjf</code>解压</li><li><code>*.Z</code> 用<code>uncompress</code>解压</li><li><code>*.tar.Z</code> 用<code>tar -xZf</code>解压</li><li><code>*.rar</code> 用<code>unrar e</code>解压</li><li><code>*.zip</code> 用<code>unzip</code>解压</li></ol>]]></content>
+    
+    
+    <categories>
+      
+      <category>服务器</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Linux</tag>
+      
+      <tag>压缩</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Nginx配置WordPress</title>
+    <link href="/2022/02/nginx%E9%85%8D%E7%BD%AEwordpress/"/>
+    <url>/2022/02/nginx%E9%85%8D%E7%BD%AEwordpress/</url>
+    
+    <content type="html"><![CDATA[<h3 id="1-下载最新workpress到应用的目录-opt"><a href="#1-下载最新workpress到应用的目录-opt" class="headerlink" title="1. 下载最新workpress到应用的目录/opt/"></a>1. 下载最新workpress到应用的目录<code>/opt/</code></h3><div class="code-wrapper"><pre><code class="hljs shell">cd /optsudo wget https://cn.wordpress.org/latest-zh_CN.tar.gz</code></pre></div><h3 id="2-解压"><a href="#2-解压" class="headerlink" title="2. 解压"></a>2. 解压</h3><div class="code-wrapper"><pre><code class="hljs shell">sudo tar -zxf latest-zh_CN.tar.gz</code></pre></div><h3 id="3-变更wordpress目录的所有者为www-data"><a href="#3-变更wordpress目录的所有者为www-data" class="headerlink" title="3. 变更wordpress目录的所有者为www-data"></a>3. 变更wordpress目录的所有者为<code>www-data</code></h3><div class="code-wrapper"><pre><code class="hljs shell">sudo chown -R www-data:root wordpress/</code></pre></div><h3 id="4-安装php7-x和php7-x-fpm"><a href="#4-安装php7-x和php7-x-fpm" class="headerlink" title="4. 安装php7.x和php7.x-fpm"></a>4. 安装<code>php7.x</code>和<code>php7.x-fpm</code></h3><p>  <strong>ubuntu</strong></p><div class="code-wrapper"><pre><code class="hljs shell">sudo apt install php7.xsudo apt install php7.x-fpm</code></pre></div><h3 id="5-安装mysql数据库创建用户，创建database"><a href="#5-安装mysql数据库创建用户，创建database" class="headerlink" title="5. 安装mysql数据库创建用户，创建database"></a>5. 安装mysql数据库创建用户，创建database</h3><h3 id="6-配置ngxin"><a href="#6-配置ngxin" class="headerlink" title="6. 配置ngxin"></a>6. 配置ngxin</h3><ol><li>在<code>/etc/nginx/sites-enabled/</code>创建网站的配置文件  <div class="code-wrapper"><pre><code class="hljs shell">sudo vim www.juu2.com</code></pre></div></li><li>配置站点  <div class="code-wrapper"><pre><code class="hljs nginx"><span class="hljs-section">server</span> &#123;    <span class="hljs-attribute">listen</span> <span class="hljs-number">80</span>;    <span class="hljs-attribute">server_name</span>  www.juu2.com;    <span class="hljs-attribute">root</span> /opt/wordpress;    <span class="hljs-section">location</span> = /favicon.ico &#123;        <span class="hljs-attribute">log_not_found</span> <span class="hljs-literal">off</span>;        <span class="hljs-attribute">access_log</span> <span class="hljs-literal">off</span>;    &#125;    <span class="hljs-section">location</span> = /robots.txt &#123;        <span class="hljs-attribute">allow</span> all;        <span class="hljs-attribute">log_not_found</span> <span class="hljs-literal">off</span>;        <span class="hljs-attribute">access_log</span> <span class="hljs-literal">off</span>;    &#125;    <span class="hljs-section">location</span> / &#123;        <span class="hljs-attribute">try_files</span> <span class="hljs-variable">$uri</span> <span class="hljs-variable">$uri</span>/ /index.php?<span class="hljs-variable">$args</span>;    &#125;    <span class="hljs-section">location</span> <span class="hljs-regexp">~ \.php$</span> &#123;        <span class="hljs-comment">#映射到php7.xfpm（注意版本号）</span>        <span class="hljs-attribute">include</span> fastcgi.conf;        <span class="hljs-attribute">fastcgi_intercept_errors</span> <span class="hljs-literal">on</span>;        <span class="hljs-attribute">fastcgi_pass</span> unix:/var/run/php/php7.2-fpm.sock;        <span class="hljs-attribute">fastcgi_buffers</span> <span class="hljs-number">16</span> <span class="hljs-number">16k</span>;        <span class="hljs-attribute">fastcgi_buffer_size</span> <span class="hljs-number">32k</span>;    &#125;    <span class="hljs-section">location</span> <span class="hljs-regexp">~* \.(js|css|png|jpg|jpeg|gif|ico)$</span> &#123;        <span class="hljs-comment">#静态文件设置过期时间到最大</span>        <span class="hljs-attribute">expires</span> max;        <span class="hljs-attribute">log_not_found</span> <span class="hljs-literal">off</span>;    &#125;&#125;</code></pre></div></li></ol><h3 id="7-增加www域名解析，并访问网站"><a href="#7-增加www域名解析，并访问网站" class="headerlink" title="7. 增加www域名解析，并访问网站"></a>7. 增加www域名解析，并访问网站</h3>]]></content>
+    
+    
+    <categories>
+      
+      <category>中间件</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>nginx</tag>
+      
+      <tag>WordPress</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Linux用Wget下载文件</title>
+    <link href="/2022/01/linux%E7%94%A8wget%E4%B8%8B%E8%BD%BD%E6%96%87%E4%BB%B6/"/>
+    <url>/2022/01/linux%E7%94%A8wget%E4%B8%8B%E8%BD%BD%E6%96%87%E4%BB%B6/</url>
+    
+    <content type="html"><![CDATA[<p>wget是linux下一个从网络上自动下载文件的常用自由工具。它支持HTTP，HTTPS和FTP协议，可以使用HTTP代理。一般的使用方法是: wget + 空格 + 参数 + 要下载文件的url路径，例如：</p><div class="code-wrapper"><pre><code class="hljs shell">wget http://www.example.com/xxxx/xxx.zip</code></pre></div><p><code>-c</code> 参数, 这个也非常常见, 可以断点续传, 如果不小心终止了, 可以继续使用命令接着下载，例如：</p><div class="code-wrapper"><pre><code class="hljs shell">wget -c http://www.example.com/xxxx/xxx.zip</code></pre></div><p><strong>Wget常用参数</strong></p><ul><li>-b：后台下载，Wget默认的是把文件下载到当前目录。</li><li>-O：将文件下载到指定的目录中。</li><li>-P：保存文件之前先创建指定名称的目录。</li><li>-t：尝试连接次数，当Wget无法与服务器建立连接时，尝试连接多少次。</li><li>-c：断点续传，如果下载中断，那么连接恢复时会从上次断点开始下载。</li><li>-r：使用递归下载</li></ul>]]></content>
+    
+    
+    <categories>
+      
+      <category>服务器</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Linux</tag>
+      
+      <tag>命令</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Linux查看硬件配置信息</title>
+    <link href="/2022/01/linux%E6%9F%A5%E7%9C%8B%E7%A1%AC%E4%BB%B6%E9%85%8D%E7%BD%AE%E4%BF%A1%E6%81%AF/"/>
+    <url>/2022/01/linux%E6%9F%A5%E7%9C%8B%E7%A1%AC%E4%BB%B6%E9%85%8D%E7%BD%AE%E4%BF%A1%E6%81%AF/</url>
+    
+    <content type="html"><![CDATA[<ul><li><h3 id="通过bench-sh查看"><a href="#通过bench-sh查看" class="headerlink" title="通过bench.sh查看"></a>通过<code>bench.sh</code>查看</h3>如果可以访问公网的话，可以直接使用下面命。<div class="code-wrapper"><pre><code class="hljs shell">wget -qO- bench.sh | bash</code></pre></div><img src="https://itlog.cdn.juu2.com/post/Linux%E6%9F%A5%E7%9C%8B%E7%A1%AC%E4%BB%B6%E9%85%8D%E7%BD%AE%E4%BF%A1%E6%81%AF/1.webp"></li></ul><p><strong><code>bench.sh</code> 既是脚本名，同时又是域。也可以自行下载脚本后手动执行脚本</strong><br>附件：<a href="https://pan.baidu.com/s/1aOlDe6OpLQChY1d9CRxUOg?pwd=8wrc">百度网盘</a> 提取码：8wrc<br>用以下命令执行</p><div class="code-wrapper"><pre><code class="hljs shell">bash bench.sh</code></pre></div><ul><li><h3 id="单独查看cpu信息"><a href="#单独查看cpu信息" class="headerlink" title="单独查看cpu信息"></a>单独查看cpu信息</h3><ul><li><p>cpu信息总览</p><div class="code-wrapper"><pre><code class="hljs shell">lscpu</code></pre></div><p><img src="https://itlog.cdn.juu2.com/post/Linux%E6%9F%A5%E7%9C%8B%E7%A1%AC%E4%BB%B6%E9%85%8D%E7%BD%AE%E4%BF%A1%E6%81%AF/2.webp"></p></li><li><p>cpu核信息</p></li></ul></li></ul><div class="code-wrapper"><pre><code class="hljs shell">cat /proc/cpuinfo</code></pre></div><ul><li><h3 id="查看内存容量"><a href="#查看内存容量" class="headerlink" title="查看内存容量"></a>查看内存容量</h3><div class="code-wrapper"><pre><code class="hljs shell">free -h</code></pre></div><p><img src="https://itlog.cdn.juu2.com/post/Linux%E6%9F%A5%E7%9C%8B%E7%A1%AC%E4%BB%B6%E9%85%8D%E7%BD%AE%E4%BF%A1%E6%81%AF/3.webp"></p></li><li><h3 id="查看磁盘容量"><a href="#查看磁盘容量" class="headerlink" title="查看磁盘容量"></a>查看磁盘容量</h3><div class="code-wrapper"><pre><code class="hljs shell">df -h</code></pre></div><p><img src="https://itlog.cdn.juu2.com/post/Linux%E6%9F%A5%E7%9C%8B%E7%A1%AC%E4%BB%B6%E9%85%8D%E7%BD%AE%E4%BF%A1%E6%81%AF/4.webp"></p></li></ul>]]></content>
+    
+    
+    <categories>
+      
+      <category>服务器</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Linux</tag>
+      
+      <tag>命令</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Docker安装MariaDB</title>
+    <link href="/2021/11/Docker%E5%AE%89%E8%A3%85MariaDB/"/>
+    <url>/2021/11/Docker%E5%AE%89%E8%A3%85MariaDB/</url>
+    
+    <content type="html"><![CDATA[<ol><li><p>搜索<code>mariadb</code>镜像（非必须）</p><div class="code-wrapper"><pre><code class="hljs shell">docker search mariadb</code></pre></div></li><li><p>下载docker镜像</p><div class="code-wrapper"><pre><code class="hljs shell">docker pull mariadb</code></pre></div></li><li><p>查看本地已有的所有镜像</p><div class="code-wrapper"><pre><code class="hljs shell">docker images</code></pre></div></li><li><p>建一个目录作为和容器的映射目录，用来存储数据库文件</p><div class="code-wrapper"><pre><code class="hljs shell">mkdir -p /data/mariadb/data</code></pre></div></li><li><p>创建docker容器</p><div class="code-wrapper"><pre><code class="hljs shell">docker run --name mariadb -p 3306:3306 -e MYSQL_ROOT_PASSWORD=输入数据库root用户的密码 -v /data/mariadb/data:/var/lib/mysql -d mariadb</code></pre></div><ul><li><code>--name</code>启动容器设置容器名称为mariadb</li><li><code>-p</code>设置容器的3306端口映射到主机3306端口</li><li><code>-e MYSQL_ROOT_PASSWORD</code>设置环境变量数据库root用户密码为输入数据库root用户的密码</li><li><code>-v</code>设置容器目录<code>/var/lib/mysql</code>映射到本地目录<code>/data/mariadb/data</code></li><li><code>-d</code>后台运行容器mariadb并返回容器id</li></ul></li><li><p>查看容器是否运行</p><div class="code-wrapper"><pre><code class="hljs shell">docker ps -a</code></pre></div></li><li><p>修改容器为自启动</p><div class="code-wrapper"><pre><code class="hljs shell">docker container update --restart=always 容器id</code></pre></div></li><li><p>进入容器</p><div class="code-wrapper"><pre><code class="hljs shell">docker exec -it 容器Id bash</code></pre></div></li><li><p>在容器内登录数据库 <code>mysql -uroot -proot密码</code></p></li></ol><p>其他常用命令：</p><div class="code-wrapper"><pre><code class="hljs shell">docker start 容器id　　启动容器docker stop 容器id　　停止容器</code></pre></div>]]></content>
+    
+    
+    <categories>
+      
+      <category>中间件</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Mariadb</tag>
+      
+      <tag>MySQL</tag>
+      
+      <tag>Docker</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Linux使用watch监控输出的变化</title>
+    <link href="/2021/09/Linux%E4%BD%BF%E7%94%A8watch%E7%9B%91%E6%8E%A7%E8%BE%93%E5%87%BA%E7%9A%84%E5%8F%98%E5%8C%96/"/>
+    <url>/2021/09/Linux%E4%BD%BF%E7%94%A8watch%E7%9B%91%E6%8E%A7%E8%BE%93%E5%87%BA%E7%9A%84%E5%8F%98%E5%8C%96/</url>
+    
+    <content type="html"><![CDATA[<p><em><strong>引用自<a href="https://www.cnblogs.com/peida/archive/2012/12/31/2840241.html">https://www.cnblogs.com/peida/archive/2012/12/31/2840241.html</a></strong></em><br>watch是一个非常实用的命令，基本所有的Linux发行版都带有这个小工具，如同名字一样，watch可以帮你监测一个命令的运行结果，省得你一遍遍的手动运行。在Linux下，watch是周期性的执行下个程序，并全屏显示执行结果。你可以拿他来监测你想要的一切命令的结果变化，比如 tail 一个 log 文件，ls 监测某个文件的大小变化，看你的想象力了！</p><h3 id="1．命令格式："><a href="#1．命令格式：" class="headerlink" title="1．命令格式："></a>1．命令格式：</h3><div class="code-wrapper"><pre><code class="hljs shell">watch [参数] [命令]</code></pre></div><h3 id="2．命令功能："><a href="#2．命令功能：" class="headerlink" title="2．命令功能："></a>2．命令功能：</h3><p>可以将命令的输出结果输出到标准输出设备，多用于周期性执行命令&#x2F;定时执行命令</p><h3 id="3．命令参数："><a href="#3．命令参数：" class="headerlink" title="3．命令参数："></a>3．命令参数：</h3><p><code>-n</code>或<code>--interval</code>  watch缺省每2秒运行一下程序，可以用<code>-n</code>或<code>-interval</code>来指定间隔的时间。<br><code>-d</code>或<code>--differences</code>  用<code>-d</code>或<code>--differences</code> 选项watch 会高亮显示变化的区域。 而<code>-d=cumulative</code>选项会把变动过的地方(不管最近的那次有没有变动)都高亮显示出来。<br><code>-t</code>或<code>-no-title</code>  会关闭watch命令在顶部的时间间隔,命令，当前时间的输出。  <br><code>-h</code>, <code>--help</code> 查看帮助文档</p><h3 id="4．使用实例："><a href="#4．使用实例：" class="headerlink" title="4．使用实例："></a>4．使用实例：</h3><h4 id="1-实例1："><a href="#1-实例1：" class="headerlink" title="1. 实例1："></a>1. 实例1：</h4><ul><li><p>命令： 每隔一秒高亮显示网络链接数的变化情况</p>  <div class="code-wrapper"><pre><code class="hljs shell">watch -n 1 -d netstat -ant</code></pre></div></li><li><p>说明：<br>其它操作：<br>切换终端： <code>&#123;Ctrl&#125;</code>+<code>&#123;x&#125;</code><br>退出watch：<code>&#123;Ctrl&#125;</code>+<code>&#123;G&#125;</code></p><h4 id="2-实例2：-每隔一秒高亮显示http链接数的变化情况"><a href="#2-实例2：-每隔一秒高亮显示http链接数的变化情况" class="headerlink" title="2. 实例2： 每隔一秒高亮显示http链接数的变化情况"></a>2. 实例2： 每隔一秒高亮显示http链接数的变化情况</h4></li><li><p>命令：</p><div class="code-wrapper"><pre><code class="hljs shell">watch -n 1 -d &amp;#039;pstree|grep http&amp;#039;</code></pre></div></li><li><p>说明：每隔一秒高亮显示http链接数的变化情况。 后面接的命令若带有管道符，需要加<code>&#39;&#39;</code>将命令区域归整。</p><h4 id="实例3：实时查看模拟攻击客户机建立起来的连接数"><a href="#实例3：实时查看模拟攻击客户机建立起来的连接数" class="headerlink" title="实例3：实时查看模拟攻击客户机建立起来的连接数"></a>实例3：实时查看模拟攻击客户机建立起来的连接数</h4></li><li><p>命令：</p><div class="code-wrapper"><pre><code class="hljs shell">watch &amp;#039;netstat -an | grep:21 | \ grep&amp;lt;模拟攻击客户机的IP&amp;gt;| wc -l&amp;#039;</code></pre></div><h4 id="4-实例4：监测当前目录中-scf’-的文件的变化"><a href="#4-实例4：监测当前目录中-scf’-的文件的变化" class="headerlink" title="4.实例4：监测当前目录中 scf’ 的文件的变化"></a>4.实例4：监测当前目录中 scf’ 的文件的变化</h4></li><li><p>命令：</p><div class="code-wrapper"><pre><code class="hljs shell">watch -d &amp;#039;ls -l|grep scf&amp;#039;</code></pre></div><h4 id="5-实例5：10秒一次输出系统的平均负载命令："><a href="#5-实例5：10秒一次输出系统的平均负载命令：" class="headerlink" title="5. 实例5：10秒一次输出系统的平均负载命令："></a>5. 实例5：10秒一次输出系统的平均负载命令：</h4><div class="code-wrapper"><pre><code class="hljs shell">watch -n 10 &amp;#039;cat /proc/loadavg&amp;#039;</code></pre></div></li></ul>]]></content>
+    
+    
+    <categories>
+      
+      <category>服务器</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Linux</tag>
+      
+      <tag>命令</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Linux的ps命令</title>
+    <link href="/2021/09/Linux%E7%9A%84ps%E5%91%BD%E4%BB%A4/"/>
+    <url>/2021/09/Linux%E7%9A%84ps%E5%91%BD%E4%BB%A4/</url>
+    
+    <content type="html"><![CDATA[<blockquote><p>Linux ps （英文全拼：process status）命令用于显示当前进程的状态，类似于 windows 的任务管理器。</p></blockquote><ul><li><h3 id="语法"><a href="#语法" class="headerlink" title="语法"></a>语法</h3><div class="code-wrapper"><pre><code class="hljs shell">ps [options] [--help]</code></pre></div></li><li><h3 id="参数："><a href="#参数：" class="headerlink" title="参数："></a>参数：</h3></li><li><p><code>-A</code> 显示所有进程（等价于-e）(utility)</p></li><li><p><code>-a</code> 显示一个终端的所有进程，除了会话引线</p></li><li><p><code>-N</code> 忽略选择。</p></li><li><p><code>-d</code> 显示所有进程，但省略所有的会话引线(utility)</p></li><li><p><code>-x</code> 显示没有控制终端的进程，同时显示各个命令的具体路径。dx不可合用。（utility）</p></li><li><p><code>-p</code> pid 进程使用cpu的时间</p></li><li><p><code>-u</code> uid or username 选择有效的用户id或者是用户名</p></li><li><p><code>-g</code> gid or groupname 显示组的所有进程。</p></li><li><p><code>U</code> username 显示该用户下的所有进程，且显示各个命令的详细路径。如:ps U zhang;(utility)</p></li><li><p><code>-f</code> 全部列出，通常和其他选项联用。如：ps -fa or ps -fx and so on.</p></li><li><p><code>-l</code> 长格式（有F,wchan,C 等字段）</p></li><li><p><code>-j</code> 作业格式</p></li><li><p><code>-o</code> 用户自定义格式。</p></li><li><p><code>v</code> 以虚拟存储器格式显示</p></li><li><p><code>s</code> 以信号格式显示</p></li><li><p><code>-m</code> 显示所有的线程</p></li><li><p><code>-H</code> 显示进程的层次(和其它的命令合用，如：ps -Ha)（utility）</p></li><li><p><code>e</code> 命令之后显示环境（如：ps -d e; ps -a e）(utility)</p></li><li><p><code>h</code> 不显示第一行</p></li><li><p><code>--version</code> 显示版本信息</p></li><li><p><code>--help</code> 显示帮助信息</p></li><li><h3 id="最常用-aux"><a href="#最常用-aux" class="headerlink" title="最常用-aux"></a>最常用<code>-aux</code></h3><p>在这个命令后面可以跟一个管道，过滤一下我们想要查看的具体程序的信息<code>ps -aux | grep java</code><br><code>-aux</code>输出格式如下</p><div class="code-wrapper"><pre><code class="hljs shell">USER PID %CPU %MEM VSZ RSS TTY STAT START TIME COMMAND</code></pre></div></li></ul><ol><li><p>USER: 行程拥有者</p></li><li><p>PID: pid</p></li><li><p>%CPU: 占用的 CPU 使用率</p></li><li><p>%MEM: 占用的记忆体使用率</p></li><li><p>VSZ: 占用的虚拟记忆体大小</p></li><li><p>RSS: 占用的记忆体大小</p></li><li><p>TTY: 终端的次要装置号码 (minor device number of tty)</p></li><li><p>STAT: 该行程的状态:</p><ul><li>D: 无法中断的休眠状态 (通常 IO 的进程)</li><li>R: 正在执行中</li><li>S: 静止状态</li><li>T: 暂停执行</li><li>Z: 不存在但暂时无法消除</li><li>W: 没有足够的记忆体分页可分配</li><li>&lt;: 高优先序的行程</li><li>N: 低优先序的行程</li><li>L: 有记忆体分页分配并锁在记忆体内 (实时系统或捱A I&#x2F;O)</li></ul></li><li><p>START: 行程开始时间</p></li><li><p>TIME: 执行的时间</p></li><li><p>COMMAND:所执行的指令</p></li></ol>]]></content>
+    
+    
+    <categories>
+      
+      <category>服务器</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Linux</tag>
+      
+      <tag>命令</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Maven本地目录和国内（阿里云）镜像设置</title>
+    <link href="/2021/08/maven%E6%9C%AC%E5%9C%B0%E7%9B%AE%E5%BD%95%E5%92%8C%E5%9B%BD%E5%86%85%EF%BC%88%E9%98%BF%E9%87%8C%E4%BA%91%EF%BC%89%E9%95%9C%E5%83%8F%E8%AE%BE%E7%BD%AE/"/>
+    <url>/2021/08/maven%E6%9C%AC%E5%9C%B0%E7%9B%AE%E5%BD%95%E5%92%8C%E5%9B%BD%E5%86%85%EF%BC%88%E9%98%BF%E9%87%8C%E4%BA%91%EF%BC%89%E9%95%9C%E5%83%8F%E8%AE%BE%E7%BD%AE/</url>
+    
+    <content type="html"><![CDATA[<p><strong>maven默认的配置文件在<code>用户/.m2/settings.xml</code>，没有的话可以复制maven软件目录conf下的settings.xml到这里。</strong></p><h3 id="本地目录设置"><a href="#本地目录设置" class="headerlink" title="本地目录设置"></a>本地目录设置</h3><p>Maven默认的存储目录在 用户&#x2F;.m2下，如果不想放在这里的话我们可以通过修改settings.xml来改变<br>在<code>settings</code>节点中添加</p><div class="code-wrapper"><pre><code class="hljs xml"><span class="hljs-symbol">&amp;lt;</span>localRepository<span class="hljs-symbol">&amp;gt;</span>../repository<span class="hljs-symbol">&amp;lt;</span>/localRepository<span class="hljs-symbol">&amp;gt;</span></code></pre></div><h3 id="远程仓库位置设置"><a href="#远程仓库位置设置" class="headerlink" title="远程仓库位置设置"></a>远程仓库位置设置</h3><p>由于中央仓库<a href="http://repo1.maven.org/maven2">http://repo1.maven.org/maven2</a> 在境外，访问速度堪忧，可以使用国内的源提速。</p><p>在文件中找到<code>mirrors</code>节点，添加下面节点</p><div class="code-wrapper"><pre><code class="hljs xml"><span class="hljs-symbol">&amp;lt;</span>mirror<span class="hljs-symbol">&amp;gt;</span>    <span class="hljs-symbol">&amp;lt;</span>id<span class="hljs-symbol">&amp;gt;</span>central<span class="hljs-symbol">&amp;lt;</span>/id<span class="hljs-symbol">&amp;gt;</span>    <span class="hljs-symbol">&amp;lt;</span>name<span class="hljs-symbol">&amp;gt;</span>aliyun repository<span class="hljs-symbol">&amp;lt;</span>/name<span class="hljs-symbol">&amp;gt;</span>    <span class="hljs-symbol">&amp;lt;</span>url<span class="hljs-symbol">&amp;gt;</span>https://maven.aliyun.com/repository/public<span class="hljs-symbol">&amp;lt;</span>/url<span class="hljs-symbol">&amp;gt;</span>    <span class="hljs-symbol">&amp;lt;</span>mirrorOf<span class="hljs-symbol">&amp;gt;</span>central<span class="hljs-symbol">&amp;lt;</span>/mirrorOf<span class="hljs-symbol">&amp;gt;</span><span class="hljs-symbol">&amp;lt;</span>/mirror<span class="hljs-symbol">&amp;gt;</span></code></pre></div>]]></content>
+    
+    
+    <categories>
+      
+      <category>工具</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Maven</tag>
+      
+      <tag>国内镜像</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Centos扩容磁盘（分卷）</title>
+    <link href="/2021/07/centos%E6%89%A9%E5%AE%B9%E7%A3%81%E7%9B%98%EF%BC%88%E5%88%86%E5%8D%B7%EF%BC%89/"/>
+    <url>/2021/07/centos%E6%89%A9%E5%AE%B9%E7%A3%81%E7%9B%98%EF%BC%88%E5%88%86%E5%8D%B7%EF%BC%89/</url>
+    
+    <content type="html"><![CDATA[<blockquote><p>我们有时候安装系统的时候，没有注意磁盘分配，导致<code>/home</code>目录下的空间太大，而根目录的空间太小。</p></blockquote><p>下面我们可以通过下面一系列命令来重新分配空间。</p><div class="code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta"># </span><span class="language-bash">查看磁盘容量</span>df -h<span class="hljs-meta"># </span><span class="language-bash">卸载磁盘</span>umount /home<span class="hljs-meta"># </span><span class="language-bash">从home卷分割出来的空间，分割出来的空间就是自由空闲空间了</span>lvreduce -L 10G /dev/mapper/centos-home<span class="hljs-meta"># </span><span class="language-bash">让上买面的操作生效</span>mkfs.xfs /dev/mapper/centos-home -f<span class="hljs-meta"># </span><span class="language-bash">挂在磁盘</span>mount -a /home<span class="hljs-meta"># </span><span class="language-bash">重新查看磁盘容量</span>df -h<span class="hljs-meta"># </span><span class="language-bash">整理磁盘，查看空闲容量，里面有free，表示可以挂在到需要扩容的磁盘上面去</span>vgdisplay<span class="hljs-meta"># </span><span class="language-bash">将空闲空间放到需要需要扩容的磁盘上面去</span>lvextend -L +10G /dev/mapper/centos-root<span class="hljs-meta"># </span><span class="language-bash">让上面一步生效</span>xfs_growfs /dev/mapper/centos-root<span class="hljs-meta"># </span><span class="language-bash">重新查看磁盘，成功</span>df -h</code></pre></div><p>我是在centos7上操作的，理论上centos8也是适用。<br><strong>直接操作磁盘风险很大，建议操作前备份好重要便防止发生意外。</strong></p>]]></content>
+    
+    
+    <categories>
+      
+      <category>服务器</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Linux</tag>
+      
+      <tag>CentOS</tag>
+      
+      <tag>硬盘</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>oh my zsh常用插件安装</title>
+    <link href="/2021/06/oh-my-zsh%E5%B8%B8%E7%94%A8%E6%8F%92%E4%BB%B6%E5%AE%89%E8%A3%85/"/>
+    <url>/2021/06/oh-my-zsh%E5%B8%B8%E7%94%A8%E6%8F%92%E4%BB%B6%E5%AE%89%E8%A3%85/</url>
+    
+    <content type="html"><![CDATA[<p><em><strong>转载自：<a href="https://hufangyun.com/2017/zsh-plugin/">https://hufangyun.com/2017/zsh-plugin/</a></strong></em></p><blockquote><p>oh my zsh自带很多插件，插件目录在 <code>~/.oh-my-zsh/plugins/</code>，可以参考官网文档，启用一些自己喜欢的插件。</p></blockquote><h3 id="git"><a href="#git" class="headerlink" title="git"></a>git</h3><p>默认已开启</p><p><strong>作用</strong></p><p>可以使用各种 <code>git</code> 命令缩写。😋</p><p>比如</p><div class="code-wrapper"><pre><code class="hljs shell">git add --all ===&amp;gt; gaagit commit -m ===&amp;gt; gcmsg</code></pre></div><p>查看所有 <code>git</code> 命令缩写</p><div class="code-wrapper"><pre><code class="hljs shell">cat ~/.oh-my-zsh/plugins/git/git.plugin.zsh</code></pre></div><p>或者筛选对应的命令，如和 <code>config</code> 有关的命令</p><div class="code-wrapper"><pre><code class="hljs shell">alias | grep config</code></pre></div><h3 id="autojump"><a href="#autojump" class="headerlink" title="autojump"></a>autojump</h3><p><a href="https://github.com/wting/autojump">autojump 官网 https://github.com/wting/autojump</a></p><p><strong>作用</strong> 目录间快速跳转,不用再一直 <code>cd</code> 了 😁</p><p><strong>使用</strong></p><p>使用 <code>autojump</code> 的缩写 <code>j</code></p><p><code>cd</code> 命令进入 <code>~/user/github/Youthink</code> 文件夹，下一次再想进入 <code>Yourhink</code> 文件夹的时候,直接 <code>j youthink</code> 即可，或者只输入 <code>youthink</code> 的一部分 <code>youth</code> 都行</p><ul><li><p>删除无效路径</p><div class="code-wrapper"><pre><code class="hljs shell">j --purge 无效路径</code></pre></div></li><li><p>打开 muisc 文件夹</p></li></ul><div class="code-wrapper"><pre><code class="hljs shell">jo music</code></pre></div><ul><li>多个参数一起使用 打开 <code>/home/user/work/inbox</code></li></ul><div class="code-wrapper"><pre><code class="hljs shell">j w in</code></pre></div><p>和 <code>Z</code> 不同 <code>autojump</code> 不是 <code>zsh</code> 内置的插件，需要额外安装。</p><p>首先安装 <code>autojump</code>，如果你用 <code>Mac</code>，可以使用 <code>brew</code> 安装：</p><div class="code-wrapper"><pre><code class="hljs shell">brew install autojump</code></pre></div><p>如果是 <code>Linux</code>，可以使用 <code>git</code> 安装，比如：</p><div class="code-wrapper"><pre><code class="hljs shell">git clone https://github.com/joelthelion/autojump.git</code></pre></div><p>进入目录，执行</p><div class="code-wrapper"><pre><code class="hljs shell">./install.py</code></pre></div><p>最后把以下代码加入 <code>.zshrc</code>：</p><div class="code-wrapper"><pre><code class="hljs shell">[[ -s ~/.autojump/etc/profile.d/autojump.sh ]] &amp;amp;&amp;amp; . ~/.autojump/etc/profile.d/autojump.sh</code></pre></div><h3 id="Z"><a href="#Z" class="headerlink" title="Z"></a>Z</h3><p>如果你不想额外安装 <code>autojump</code></p><p>可以使用 <code>oh-my-zsh</code> 内置的类似组件 <a href="https://github.com/rupa/z">Z</a><br>和 <code>autojump</code> 除了名字不一样，基本雷同。</p><div class="code-wrapper"><pre><code class="hljs shell">z -x 无效路径</code></pre></div><h3 id="zsh-syntax-highlighting"><a href="#zsh-syntax-highlighting" class="headerlink" title="zsh-syntax-highlighting"></a>zsh-syntax-highlighting</h3><p><a href="https://github.com/zsh-users/zsh-syntax-highlighting">官网 https://github.com/zsh-users/zsh-syntax-highlighting</a></p><p><strong>作用</strong> 平常用的<code>ls</code>、<code>cd</code> 等命令输入正确会绿色高亮显示，输入错误会显示其他的颜色。</p><p><strong>安装</strong></p><p>克隆项目</p><div class="code-wrapper"><pre><code class="hljs shell">git clone https://github.com/zsh-users/zsh-syntax-highlighting.git $&#123;ZSH_CUSTOM:-~/.oh-my-zsh/custom&#125;/plugins/zsh-syntax-highlighting</code></pre></div><p>在 <code>~/.zshrc</code> 中配置</p><div class="code-wrapper"><pre><code class="hljs abnf"><span class="hljs-attribute">plugins</span><span class="hljs-operator">=</span>(其他的插件 zsh-syntax-highlighting)</code></pre></div><p>使配置生效</p><div class="code-wrapper"><pre><code class="hljs shell">source ~/.zshrc</code></pre></div><h3 id="zsh-autosuggestions"><a href="#zsh-autosuggestions" class="headerlink" title="zsh-autosuggestions"></a>zsh-autosuggestions</h3><p><a href="https://github.com/zsh-users/zsh-autosuggestions">官网 https://github.com/zsh-users/zsh-autosuggestions</a></p><p><strong>作用</strong></p><p>效率神器 👍</p><p>如图输入命令时，会给出建议的命令（灰色部分）按键盘 → 补全</p><p>在 <code>.zshrc</code> 文件添加这句话即可。</p><p><strong>安装</strong></p><p>克隆项目</p><div class="code-wrapper"><pre><code class="hljs shell">git clone git://github.com/zsh-users/zsh-autosuggestions $ZSH_CUSTOM/plugins/zsh-autosuggestions</code></pre></div><p>在 <code>~/.zshrc</code> 中配置</p><div class="code-wrapper"><pre><code class="hljs abnf"><span class="hljs-attribute">plugins</span><span class="hljs-operator">=</span>(其他的插件 zsh-autosuggestions)</code></pre></div><p>使配置生效</p><div class="code-wrapper"><pre><code class="hljs shell">source ~/.zshrc</code></pre></div>]]></content>
+    
+    
+    <categories>
+      
+      <category>工具</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Linux</tag>
+      
+      <tag>shell</tag>
+      
+      <tag>zsh</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>CentOS7防火墙(firewalld)配置</title>
+    <link href="/2021/05/centos7%E9%98%B2%E7%81%AB%E5%A2%99firewalld%E9%85%8D%E7%BD%AE/"/>
+    <url>/2021/05/centos7%E9%98%B2%E7%81%AB%E5%A2%99firewalld%E9%85%8D%E7%BD%AE/</url>
+    
+    <content type="html"><![CDATA[<h3 id="1-firewall运行"><a href="#1-firewall运行" class="headerlink" title="1. firewall运行"></a>1. firewall运行</h3><ol><li><p>查看firewall运行状态</p><div class="code-wrapper"><pre><code class="hljs shell">systemctl status firewalld</code></pre></div></li><li><p>开启、重启、关闭、firewalld.service服务</p><div class="code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta"># </span><span class="language-bash">开启</span>service firewalld start<span class="hljs-meta"># </span><span class="language-bash">重启</span>service firewalld restart<span class="hljs-meta"># </span><span class="language-bash">关闭</span>service firewalld stop</code></pre></div></li><li><p>开机启动</p><div class="code-wrapper"><pre><code class="hljs shell">systemctl enable firewalld</code></pre></div></li></ol><h3 id="2-firewall操作"><a href="#2-firewall操作" class="headerlink" title="2. firewall操作"></a>2. firewall操作</h3><ol><li>查看现有规则</li></ol><div class="code-wrapper"><pre><code class="hljs shell">firewall-cmd --list-all</code></pre></div><ol start="2"><li><p>查询、开启、关闭端口</p><div class="code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta">#</span><span class="language-bash">查看防火墙的开放的端口</span>firewall-cmd --permanent --list-ports<span class="hljs-meta"># </span><span class="language-bash">查询端口是否开放</span>firewall-cmd --query-port=8080/tcp<span class="hljs-meta"># </span><span class="language-bash">开放80端口</span>firewall-cmd --permanent --add-port=80/tcp<span class="hljs-meta"># </span><span class="language-bash">开放8080到8085所有端口</span>firewall-cmd --permanent --add-port=8080-8085/tcp<span class="hljs-meta"># </span><span class="language-bash">移除端口</span>firewall-cmd --permanent --remove-port=8080/tcp</code></pre></div></li><li><p>重启防火墙（重新加载防火墙配置）</p><div class="code-wrapper"><pre><code class="hljs shell">firewall-cmd --reload</code></pre></div></li></ol><blockquote><p>参数解释</p><ol><li><code>firewall-cmd</code>：是Linux提供的操作firewall的一个工具；</li><li><code>--permanent</code>：表示设置为持久；</li><li><code>--add-port</code>：标识添加的端口；</li></ol></blockquote>]]></content>
+    
+    
+    <categories>
+      
+      <category>服务器</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Linux</tag>
+      
+      <tag>CentOS</tag>
+      
+      <tag>防火墙</tag>
+      
+      <tag>firewalld</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Git常用命令</title>
+    <link href="/2021/05/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/"/>
+    <url>/2021/05/Git%E5%B8%B8%E7%94%A8%E5%91%BD%E4%BB%A4/</url>
+    
+    <content type="html"><![CDATA[<h3 id="创建版本库"><a href="#创建版本库" class="headerlink" title="创建版本库"></a>创建版本库</h3><ol><li>克隆远程版本库<div class="code-wrapper"><pre><code class="hljs shell">git clone &amp;lt;url&amp;gt;</code></pre></div></li><li>初始化本地版本库<div class="code-wrapper"><pre><code class="hljs shell">git init</code></pre></div><h3 id="修改和提交"><a href="#修改和提交" class="headerlink" title="修改和提交"></a>修改和提交</h3></li><li>查看状态<div class="code-wrapper"><pre><code class="hljs shell">git status</code></pre></div></li><li>查看变更内容<div class="code-wrapper"><pre><code class="hljs shell">git diff</code></pre></div></li><li>跟踪所有改动过的文件<div class="code-wrapper"><pre><code class="hljs shell">git add .</code></pre></div></li><li>跟踪指定的问题件<div class="code-wrapper"><pre><code class="hljs shell">git add &amp;lt;file&amp;gt;</code></pre></div></li><li>文件改名<div class="code-wrapper"><pre><code class="hljs shell">git mv &amp;lt;old&amp;gt; &amp;lt;new&amp;gt;</code></pre></div></li><li>删除文件<div class="code-wrapper"><pre><code class="hljs shell">git rm &amp;lt;file&amp;gt;</code></pre></div></li><li>停止跟踪文件但不删除<div class="code-wrapper"><pre><code class="hljs shell">git rm --cached &amp;lt;file&amp;gt;</code></pre></div></li><li>提交所有更新过的文件<div class="code-wrapper"><pre><code class="hljs shell">git commit -m &amp;quot;commit message&amp;quot;</code></pre></div></li><li>修改最后一次提交<div class="code-wrapper"><pre><code class="hljs shell">git commit --amend</code></pre></div><h3 id="查看提交历史"><a href="#查看提交历史" class="headerlink" title="查看提交历史"></a>查看提交历史</h3></li><li>查看提交历史<div class="code-wrapper"><pre><code class="hljs shell">git log</code></pre></div></li><li>查看指定文件的提交历史<div class="code-wrapper"><pre><code class="hljs shell">git log -p &amp;lt;file&amp;gt;</code></pre></div></li><li>以列表方式查看指定文件<div class="code-wrapper"><pre><code class="hljs shell">git blame &amp;lt;file&amp;gt;</code></pre></div><h3 id="撤销"><a href="#撤销" class="headerlink" title="撤销"></a>撤销</h3></li><li>撤销工作目录中所有未提交文件的修改内容<div class="code-wrapper"><pre><code class="hljs shell">git rest --hard HEAD</code></pre></div></li><li>修改指定的未提交文件的修改内容<div class="code-wrapper"><pre><code class="hljs shell">git checkout HEAD &amp;lt;file&amp;gt;</code></pre></div></li><li>撤销指定的提交<div class="code-wrapper"><pre><code class="hljs shell">git revert &amp;lt;cimmit&amp;gt;</code></pre></div><h3 id="分支与标签"><a href="#分支与标签" class="headerlink" title="分支与标签"></a>分支与标签</h3></li><li>显示所有本地分支<div class="code-wrapper"><pre><code class="hljs shell">git branch</code></pre></div></li><li>切换到指定分支或标签<div class="code-wrapper"><pre><code class="hljs shell">git checkout &amp;lt;branch/tag&amp;gt;</code></pre></div></li><li>创建新分支<div class="code-wrapper"><pre><code class="hljs shell">git branch &amp;lt;new branch&amp;gt;</code></pre></div></li><li>删除本地分支<div class="code-wrapper"><pre><code class="hljs shell">git branch -d &amp;lt;branch&amp;gt;</code></pre></div></li><li>列出所有本地分支<div class="code-wrapper"><pre><code class="hljs shell">git tag</code></pre></div></li><li>基于最新提交创建标签<div class="code-wrapper"><pre><code class="hljs shell">git tag &amp;lt;tagname&amp;gt;</code></pre></div></li><li>删除标签<div class="code-wrapper"><pre><code class="hljs shell">git tag -d &amp;lt;tagname&amp;gt;</code></pre></div><h3 id="合并与衍合"><a href="#合并与衍合" class="headerlink" title="合并与衍合"></a>合并与衍合</h3></li><li>合并指定分支到当前分支<div class="code-wrapper"><pre><code class="hljs shell">git merge &amp;lt;branch&amp;gt;</code></pre></div></li><li>衍合指定分支到当前分支<div class="code-wrapper"><pre><code class="hljs shell">git rebase &amp;lt;branch&amp;gt;</code></pre></div><h2 id="远程操作"><a href="#远程操作" class="headerlink" title="远程操作"></a>远程操作</h2></li><li>查看远程版本库信息<div class="code-wrapper"><pre><code class="hljs shell">git remote -v</code></pre></div></li><li>查看指定远程版本库信息<div class="code-wrapper"><pre><code class="hljs shell">git remote shellow &amp;lt;remote&amp;gt;</code></pre></div></li><li>添加远程版本库信息<div class="code-wrapper"><pre><code class="hljs shell">git remote add &amp;lt;remote&amp;gt; &amp;lt;url&amp;gt;</code></pre></div></li><li>从远程库获代码<div class="code-wrapper"><pre><code class="hljs shell">git fetch &amp;lt;remote&amp;gt;</code></pre></div></li><li>下载代码及快速合并<div class="code-wrapper"><pre><code class="hljs shell">git pull &amp;lt;remote&amp;gt; &amp;lt;brabch&amp;gt;</code></pre></div></li><li>上传代码及快速合并<div class="code-wrapper"><pre><code class="hljs shell">git push &amp;lt;remote&amp;gt; &amp;lt;branch&amp;gt;</code></pre></div></li><li>删除远程分支或标签<div class="code-wrapper"><pre><code class="hljs shell">git push &amp;lt;remote&amp;gt; :&amp;lt;branch/tag-namr&amp;gt;</code></pre></div></li><li>上传所有标签<div class="code-wrapper"><pre><code class="hljs shell">git push --tags</code></pre></div></li></ol>]]></content>
+    
+    
+    <categories>
+      
+      <category>工具</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Git</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Nginx配置http://跳转到带https://www</title>
+    <link href="/2021/04/Nginx%E9%85%8D%E7%BD%AEhttp-%E8%B7%B3%E8%BD%AC%E5%88%B0%E5%B8%A6https-www/"/>
+    <url>/2021/04/Nginx%E9%85%8D%E7%BD%AEhttp-%E8%B7%B3%E8%BD%AC%E5%88%B0%E5%B8%A6https-www/</url>
+    
+    <content type="html"><![CDATA[<h2 id="1-增加域名解析"><a href="#1-增加域名解析" class="headerlink" title="1. 增加域名解析"></a>1. 增加域名解析</h2><p>在域名解析配置中新增解析，记录类型选<code>A类</code>，主机记录输入<code>@</code>,记录值数据自己的服务IP，其他都是默认设置。<br><img src="https://itlog.cdn.juu2.com/post/Nginx%E9%85%8D%E7%BD%AEhttp-%E8%B7%B3%E8%BD%AC%E5%88%B0%E5%B8%A6https-www/1.jpg"></p><h2 id="2-配置nginx"><a href="#2-配置nginx" class="headerlink" title="2. 配置nginx"></a>2. 配置nginx</h2><ol><li>nginx配置中server_name增加无www的域名;</li><li>增加301重定向配置<br>nginx 配置如下：</li></ol><div class="code-wrapper"><pre><code class="hljs perl">server&#123;    <span class="hljs-keyword">listen</span> <span class="hljs-number">80</span>;    server_name jutil.com www.jutil.com;    <span class="hljs-comment"># http的地址跳转到https://www</span>    <span class="hljs-keyword">return</span> <span class="hljs-number">301</span> https:<span class="hljs-regexp">//</span>www.jutil.com$request_uri;&#125;server &#123;    <span class="hljs-keyword">listen</span> <span class="hljs-number">443</span> ssl;    server_name jutil.com;    <span class="hljs-comment">#不带www跳转到www</span>    <span class="hljs-keyword">return</span> <span class="hljs-number">301</span> https:<span class="hljs-regexp">//</span>www.jutil.com$request_uri;&#125;server &#123;    <span class="hljs-keyword">listen</span> <span class="hljs-number">443</span> default_server ssl;    <span class="hljs-comment">## Your website name goes here.</span>    server_name  www.jutil.com;        <span class="hljs-comment">#......其他配置</span>    &#125;</code></pre></div>]]></content>
+    
+    
+    <categories>
+      
+      <category>中间件</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>域名</tag>
+      
+      <tag>nginx</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>安装oh my zsh</title>
+    <link href="/2021/03/%E5%AE%89%E8%A3%85oh-my-zsh/"/>
+    <url>/2021/03/%E5%AE%89%E8%A3%85oh-my-zsh/</url>
+    
+    <content type="html"><![CDATA[<blockquote><p>Oh My Zsh官网 <a href="https://ohmyz.sh/">https://ohmyz.sh/</a></p></blockquote><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>直接执行以下命令就可以安装</p><div class="code-wrapper"><pre><code class="hljs shell">sh -c &amp;quot;$(curl -fsSL https://raw.github.com/ohmyzsh/ohmyzsh/master/tools/install.sh)&amp;quot;</code></pre></div><p>执行成功之后重新打开终端，发现终端的配色已经不一样了，这就说明安装成功了。</p><h3 id="配置"><a href="#配置" class="headerlink" title="配置"></a>配置</h3><p>zsh的配置统一在用户目录下的<code>.zshrc</code>文件</p><div class="code-wrapper"><pre><code class="hljs shell"><span class="hljs-meta"># </span><span class="language-bash">打开配置文件</span>vim ~/.zshrc<span class="hljs-meta"></span><span class="hljs-meta"># </span><span class="language-bash">生效配置</span>source ~/.zshrc</code></pre></div><ul><li><h4 id="修改主题"><a href="#修改主题" class="headerlink" title="修改主题"></a>修改主题</h4><p>修改<code>ZSH_THEME</code>的值为想要的主题，具体的主题可以，<code>random</code>为随机主题。（支持的主题可以在官网找一找，默认带了很多的主题）</p></li><li><h4 id="配置插件"><a href="#配置插件" class="headerlink" title="配置插件"></a>配置插件</h4><p>修改<code>plugins</code>的值，用空格分开。默认安装的有<code>git</code>插件</p></li></ul><h3 id="快捷键"><a href="#快捷键" class="headerlink" title="快捷键"></a>快捷键</h3><p>oh my zsh有自己的快捷键，<code>&#123;Home&#125;</code>、<code>&#123;End&#125;</code>、<code>&#123;Del&#125;</code>这些快捷键会失效</p><ul><li><code>&#123;ctrl&#125;</code> + <code>&#123;U&#125;</code>：清空当前行</li><li><code>&#123;ctrl&#125;</code> + <code>&#123;A&#125;</code>：移动到行首</li><li><code>&#123;ctrl&#125;</code> + <code>&#123;E&#125;</code>：移动到行尾</li><li><code>&#123;ctrl&#125;</code> + <code>&#123;F&#125;</code>：向前移动</li><li><code>&#123;ctrl&#125;</code> + <code>&#123;B&#125;</code>：向后移动</li><li><code>&#123;ctrl&#125;</code> + <code>&#123;P&#125;</code>：上一条命令</li><li><code>&#123;ctrl&#125;</code> + <code>&#123;N&#125;</code>：下一条命令</li><li><code>&#123;ctrl&#125;</code> + <code>&#123;R&#125;</code>：搜索历史命令</li><li><code>&#123;ctrl&#125;</code> + <code>&#123;Y&#125;</code>：召回最近用命令删除的文字</li><li><code>&#123;ctrl&#125;</code> + <code>&#123;H&#125;</code>：删除光标之前的字符</li><li><code>&#123;ctrl&#125;</code> + <code>&#123;D&#125;</code>：删除光标所指的字符</li><li><code>&#123;ctrl&#125;</code> + <code>&#123;W&#125;</code>：删除光标之前的单词</li><li><code>&#123;ctrl&#125;</code> + <code>&#123;K&#125;</code>：删除从光标到行尾的内容</li><li><code>&#123;ctrl&#125;</code> + <code>&#123;T&#125;</code>：交换光标和之前的字符</li></ul>]]></content>
+    
+    
+    <categories>
+      
+      <category>工具</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Linux</tag>
+      
+      <tag>shell</tag>
+      
+      <tag>zsh</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  <entry>
+    <title>Linux文件目录说明</title>
+    <link href="/2021/02/Linux%E6%96%87%E4%BB%B6%E7%9B%AE%E5%BD%95%E8%AF%B4%E6%98%8E/"/>
+    <url>/2021/02/Linux%E6%96%87%E4%BB%B6%E7%9B%AE%E5%BD%95%E8%AF%B4%E6%98%8E/</url>
+    
+    <content type="html"><![CDATA[<p><strong>Linux一般相应的文件都会会放在相应的目录下，这样更有利于文件的查找。</strong></p><ul><li><code>/home</code> 用户主目录，相当于Win系统<code>C:\User\ </code>目录，可以存放各种文件，受权限保护，当前用户的主目录可以用<code>~</code>表示</li><li><code>/root</code> root账号的主目录，在root账号下也可以使用<code>~</code>代表</li><li><code>/bin</code> 可执行命令，该目录下的程序可以在任何地方直接执行，安装软件的时候，一些软件会把主程序注册到这个目录下</li><li><code>/dev</code> device，外部设备目录，不包含设备驱动程序</li><li><code>/etc</code> 系统管理和配置文件</li><li><code>/etc/rc.d</code> 启动的配置文件和脚本</li><li><code>/opt</code> 可选的程序安装目录，建议存放删除目录就卸载的程序</li><li><code>/lib</code> 标准程序依赖的库文件(.so)会放在这里，又叫动态链接共享库，作用类似windows里的.dll文件</li><li><code>/sbin</code> 超级管理命令，这里存放的是系统管理员使用的管理程序，如果是root用户，可以在任何地方执行这个目录下的程序</li><li><code>/tmp</code> 公共的临时文件存储点，系统默认的临时文件目录，系统会根据情况自动清理对应数据</li><li><code>/mnt</code> 临时挂载的目录，比如U盘可以挂载在这个目录下</li><li><code>/lost+found</code>系统非正常关机而留下“无家可归”的文件（windows下叫什么.chk）就在这里，如果有异常关机而丢失的文件可以在这里看看有没有</li><li><code>/proc</code> 软连接映射的虚拟的目录，是系统内存的映射。可以直接访问这个目录来获取系统信息。</li><li><code>/var</code> 某些大文件的溢出区，比方说各种服务的日志文件，一些程序会把数据文件放在这个目录下，比如mysql的数据文件</li><li><code>/usr</code> 应用程序和文件几乎都在这个目录，基本上发行版linux自带的非原生系统程序都会安装在这里，一般程序的默认安装目录也是这里</li></ul>]]></content>
+    
+    
+    <categories>
+      
+      <category>服务器</category>
+      
+    </categories>
+    
+    
+    <tags>
+      
+      <tag>Linux</tag>
+      
+      <tag>目录</tag>
+      
+    </tags>
+    
+  </entry>
+  
+  
+  
+  
+</search>
